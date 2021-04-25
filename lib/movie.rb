@@ -1,7 +1,8 @@
 class Movie
-  attr_accessor :title, :director, :year, :genre
+  attr_accessor :rank, :title, :director, :year, :genre
 
   def initialize(params)
+    @rank = params[:rank]
     @title = params[:title]
     @director = params[:director]
     @year = params[:year]
@@ -9,6 +10,6 @@ class Movie
   end
 
   def to_s
-    "#{@director} - #{@title} (#{genre}, #{@year} год)"
+    "#{@director} - #{@title} (#{genre}, #{@year} год, #{@rank} место в рейтине IMDb)."
   end
 end

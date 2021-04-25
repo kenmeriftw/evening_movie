@@ -9,17 +9,16 @@ URL = "https://ru.wikipedia.org/wiki/250_%D0%BB%D1%83%D1%87%D1%88%D0%B8%D1%85_" 
 
 puts 'Выберите режиссера и введите номер'
 
-movies = MoviesCollection.from_list(URL)
+movies_collection = MoviesCollection.from_list(URL)
 
 puts 'Фильм какого режиссера Вы хотите сегодня посмотреть?'
-
-puts movies.directors_list
+puts movies_collection.directors_list
 
 print '> '
 user_input = STDIN.gets.to_i
 
-if user_input.between?(0, movies.selected_directors.size)
-  random_movie = movies.select(user_input - 1)
+if user_input.between?(0, movies_collection.directors_list.size)
+  random_movie = movies_collection.select(user_input)
 else
   puts 'Вы ввели некорректное значение.'
   exit

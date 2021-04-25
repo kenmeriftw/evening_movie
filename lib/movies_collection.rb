@@ -7,31 +7,21 @@ class MoviesCollection
   attr_reader :movies, :selected_directors, :selected_movies
 
   def self.from_list(url)
-    # парсим вики
-    doc = Nokogiri::HTML(URI.parse(url).open)
-
-    nodes = []
-    movies_nodes = []
     movies = []
-
-    # достаем все элементы <td>, загоняем в массив нод
-    doc.css('td').map { |node| nodes << node.text }
-
-    # обрезаем два первых элемента - лишние
-    2.times { nodes.delete_at(0) }
-    # делим на массивы по пять записей (информация о каждом фильме в отдельный подмассив)
-    nodes.each_slice(5).map { |movie| movies_nodes << movie }
-    # удаляем первый элемент - порядковый номер в рейтинге, он нам пока не нужен
-    movies_nodes.map do |movie|
-      movie.delete_at(0)
-    end
-
-    movies_nodes.map do |movie|
+    # парсим страницу Википедии
+    doc = Nokogiri::HTML(URI.parse(url).open)
+    # достаем элементы из table, разделяем их на массивы
+    movies_nodes = doc.css('table').text.split("\n\n\n").map { |el| el.split("\n").to_a }  
+    # убираем два первых элемента - служебные поля таблицы
+    2.times { movies_nodes.delete_at(0) }
+    # формируем коллекцию
+    movies_nodes.map do |el|
       movies << Movie.new(
-        title: movie[0],
-        year: movie[1],
-        director: movie[2],
-        genre: movie[3].chomp
+        rank: el[0],
+        title: el[1],
+        year: el[2],
+        director: el[3],
+        genre: el[4]
       )
     end
     new(movies)
@@ -39,20 +29,14 @@ class MoviesCollection
 
   def initialize(movies = [])
     @movies = movies
-    @directors = @movies.map(&:director).uniq
   end
 
   def directors_list
-    @selected_directors = []
-    @directors.map.with_index(1) { |director, index| @selected_directors << "#{index}. #{director}" }
-    @selected_directors
+    @directors = @movies.map(&:director).uniq
+    @directors.map.with_index(1) { |director, index| "#{index}. #{director}" }
   end
 
   def select(director_index)
-    @selected_movies = []
-    @movies.map do |movie|
-      @selected_movies << movie if movie.director == @directors[director_index]
-    end
-    @selected_movies
+    @movies.select { |el| el.director == @directors[director_index - 1] }
   end
 end
